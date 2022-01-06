@@ -2,6 +2,7 @@
 @using UserData.Shared
 @inject HttpClient httpClient
 @inject IJSRuntime jsRuntime
+@inject NavigationManager nav
 
 @if (MyUsers != null)
 {
@@ -21,18 +22,56 @@
             {
                 <tr>
                     <td>@user.Id</td>
-                    <td>@user.FirstName</td>
-                    <td>@user.LastName</td>
-                    <td>@user.Email</td>
+
                     <td>
-                        <button class="btn btn-primary btn-sm mr-2">Update</button>
-                        <button class="btn btn-danger btn-sm">Delete</button>
+                        @if (tempUser != null && tempUser == user)
+                        {
+                            <input type="text" @bind="@user.FirstName" />
+                        }
+                        else
+                        {
+                            @user.FirstName}
+                    </td>
+
+
+                    <td>
+                        @if (tempUser != null && tempUser == user)
+                        {
+                            <input type="text" @bind="@user.LastName" />
+                        }
+                        else
+                        {
+                            @user.LastName
+                        }
+                    </td>
+
+
+                    <td>
+
+                        @user.Email
+
+                    </td>
+
+
+                    <td>
+                        @if (tempUser != null && tempUser == user)
+                        {
+                            <button class="btn btn-success btn-sm-ar-2" @onclick="() => UpdateUser(user)">Save</button>
+                            <button class="btn btn-danger btn-sm-ar-2" @onclick="() => CancelUpdate(user)">Cancel</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-primary btn-sm-ar-2" @onclick="() => ToggleUpdate(user)">Update</button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteUser(user)">Delete</button>
+                        }
+
                     </td>
                 </tr>
             }
 
         </tbody>
     </table>
+    <button class="btn btn-secondary" type="button" @onclick="Redirect">Add User</button>
 }
 else
 {
@@ -42,6 +81,8 @@ else
 
 @code {
     List<User> MyUsers = null;
+
+    User tempUser = null;
 
     protected override async Task OnInitializedAsync()
     {
@@ -56,5 +97,35 @@ else
         }
     }
 
+    //update
+    private void ToggleUpdate(User user)
+    {
+        tempUser = user;
+    }
+
+    private async Task UpdateUser(User newUser)
+    {
+        await httpClient.PutAsJsonAsync("/api/user", newUser);
+        MyUsers = await httpClient.GetFromJsonAsync<List<User>>("/api/user");
+
+    }
+
+    private async Task CancelUpdate(User newUser)
+    {
+        MyUsers = await httpClient.GetFromJsonAsync<List<User>>("/api/user");
+    }
+
+    //Add
+    public void Redirect()
+    {
+        nav.NavigateTo("/AddUser");
+    }
+
+    //Delete
+    private async Task DeleteUser(User user)
+    {
+        await httpClient.DeleteAsync($"/api/user/{user.Id}");
+        await OnInitializedAsync();
+    }
 
 }
