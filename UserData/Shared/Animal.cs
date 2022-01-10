@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 
 namespace UserData.Shared
 {
-    public class User
+    public class Animal
     {
         public int Id { get; set; }
-        public string FirstName { get; set; }
+        public string Name { get; set; }
 
-        public string LastName { get; set; }
+        public int Age { get; set; }
 
-        public string Email { get; set; }
+        public string Gender { get; set; }
 
-        public bool? Valid { get; set; }
+        public string Colour { get; set; }
     }
 }

@@ -7,13 +7,18 @@
 @if (MyUsers != null)
 {
     <h1>Users</h1>
+
+
+        <input type="text" @bind="TempName" />
+        <button class="btn btn-primary btn-sm-ar-2" @onclick="() => Search(TempName)">Search</button>
     <table class="table table-dark">
         <thead>
             <tr>
                 <th>Id</th>
-                <th>Expression</th>
-                <th>Result</th>
-                <th>Action</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Email</th>
+                <th>Valid</th>
             </tr>
         </thead>
         <tbody>
@@ -52,6 +57,19 @@
 
                     </td>
 
+                    <td>
+                        @if (user.Valid == null)
+                        {
+                            <p> Its null</p>
+                        }
+                        else
+                        {
+                            @user.Valid
+                        }
+
+
+                    </td>
+
 
                     <td>
                         @if (tempUser != null && tempUser == user)
@@ -62,7 +80,8 @@
                         else
                         {
                             <button class="btn btn-primary btn-sm-ar-2" @onclick="() => ToggleUpdate(user)">Update</button>
-                            <button class="btn btn-danger btn-sm" @onclick="() => DeleteUser(user)">Delete</button>
+                            <button class="btn btn-danger btn-sm-ar-2" @onclick="() => DeleteUser(user)">Delete</button>
+                            <button class="btn btn-success btn-sm-ar-2" @onclick="() => ValidateUser(user)">Validate</button>
                         }
 
                     </td>
@@ -80,12 +99,17 @@ else
 
 
 @code {
-    List<User> MyUsers = null;
+    List<User> MyUsers = new List<User>();
+
+    List<User> SearchedUsers = null;
 
     User tempUser = null;
 
+    string TempName = "";
+
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
         try
         {
             MyUsers = await httpClient.GetFromJsonAsync<List<User>>("api/user");
@@ -95,6 +119,11 @@ else
 
             throw e;
         }
+    }
+
+    private async Task Search(string name)
+    {
+        MyUsers = await httpClient.GetFromJsonAsync<List<User>>($"api/user/search?name={name}");
     }
 
     //update
@@ -121,11 +150,31 @@ else
         nav.NavigateTo("/AddUser");
     }
 
+    private void Test()
+        {
+
+        }
+
     //Delete
     private async Task DeleteUser(User user)
     {
         await httpClient.DeleteAsync($"/api/user/{user.Id}");
         await OnInitializedAsync();
+    }
+
+    //Validate
+    private async Task ValidateUser(User user)
+    {
+        user.Valid = (user.Email.ToLower().Contains(user.FirstName.ToLower()) && user.Email.ToLower().Contains(user.LastName.ToLower()));
+        if (user.Valid == true)
+        {
+            await jsRuntime.InvokeVoidAsync("alert", $"The email {user.Email} contains both the name {user.FirstName} and the surname {user.LastName}.");
+        }
+        else
+        {
+            await jsRuntime.InvokeVoidAsync("alert", "Email does not contain both the name or the surname.");
+        }
+        await httpClient.PutAsJsonAsync($"/api/user/id", user);
     }
 
 }

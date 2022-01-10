@@ -18,21 +18,24 @@ namespace Calculator.Server.Configuration.Entities
                    Id = 1,
                    FirstName = "John",
                    LastName = "Snow",
-                   Email = "John@snow.com"
+                   Email = "John@snow.com",
+                   Valid = false
                },
                 new User
                 {
                     Id = 2,
                     FirstName = "Sally",
                     LastName = "Jones",
-                    Email = "Sally@jones.com"
+                    Email = "Sally@jones.com",
+                    Valid = false
                 },
                  new User
                  {
                      Id = 3,
                      FirstName = "Mary",
                      LastName = "Poppins",
-                     Email = "mary@poppins.com"
+                     Email = "mary@poppins.com",
+                     Valid = false
                  }
 
                );

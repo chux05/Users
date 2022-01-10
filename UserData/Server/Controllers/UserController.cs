@@ -37,6 +37,13 @@ namespace UserData.Server.Controllers
             return Ok(result);
         }
 
+        [HttpGet("search")]
+        public async Task<IActionResult> GetUserByQuery([FromQuery] string name)
+        {
+            var result = _context.Users.Where(q => q.FirstName == name);
+            return Ok(result);
+        }
+
         [HttpPost]
         public async Task<IActionResult> AddUser([FromBody] User newUser)
         {
@@ -48,7 +55,7 @@ namespace UserData.Server.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(int id)
         {
-        
+
             if (id < 1)
             {
                 return BadRequest(ModelState);
@@ -73,7 +80,7 @@ namespace UserData.Server.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, e.Message);
             }
-           
+
         }
 
 
@@ -88,6 +95,19 @@ namespace UserData.Server.Controllers
             User.FirstName = chosenUser.FirstName;
             User.LastName = chosenUser.LastName;
 
+            await _context.SaveChangesAsync();
+            return Ok("");
+        }
+
+        [HttpPut("id")]
+        public async Task<IActionResult> UpdateValidity([FromBody] User chosenUser)
+        {
+            var User = _context.Users.FirstOrDefault(x => x.Id == chosenUser.Id);
+            if (User == null)
+            {
+                return BadRequest("Submitted data is invalid");
+            }
+            User.Valid = chosenUser.Valid;
             await _context.SaveChangesAsync();
             return Ok("");
         }
