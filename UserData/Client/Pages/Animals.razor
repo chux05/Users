@@ -1,0 +1,159 @@
+﻿@page "/animals"
+@using UserData.Shared
+@inject HttpClient httpClient
+@inject IJSRuntime jsRuntime
+@inject NavigationManager nav
+
+@if (MyAnimals != null)
+{
+    <h1>Animals</h1>
+
+
+    <input type="text" @bind="TempName" />
+    <button class="btn btn-primary btn-sm-ar-2" @onclick="() => Search(TempName)">Search</button>
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>Gender</th>
+                <th>Colour</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @foreach (var Animal in MyAnimals)
+            {
+                <tr>
+                    <td>@Animal.Id</td>
+
+                    <td>
+                        @if (tempAnimal != null && tempAnimal == Animal)
+                        {
+                            <input type="text" @bind="@Animal.Name" />
+                        }
+                        else
+                        {
+                            @Animal.Name}
+                    </td>
+
+
+                    <td>
+                        @if (tempAnimal != null && tempAnimal == Animal)
+                        {
+                            <input type="text" @bind="@Animal.Gender" />
+                        }
+                        else
+                        {
+                            @Animal.Gender
+                        }
+                    </td>
+
+
+
+                    <td>
+
+                        @Animal.Colour
+
+                    </td>
+
+                    <td>
+
+                        @Animal.Age
+
+                    </td>
+
+
+                    <td>
+                        @if (tempAnimal != null && tempAnimal == Animal)
+                        {
+                            <button class="btn btn-success btn-sm-ar-2" @onclick="() => UpdateAnimal(Animal)">Save</button>
+                            <button class="btn btn-danger btn-sm-ar-2" @onclick="() => CancelUpdate(Animal)">Cancel</button>
+                        }
+                        else
+                        {
+                            <button class="btn btn-primary btn-sm-ar-2" @onclick="() => ToggleUpdate(Animal)">Update</button>
+                            <button class="btn btn-danger btn-sm-ar-2" @onclick="() => DeleteAnimal(Animal)">Delete</button>
+                        }
+
+                    </td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+    <button class="btn btn-secondary" type="button" @onclick="Redirect">Add Animal</button>
+}
+else
+{
+    <h1 style="text-align:center">Loading...</h1>
+}
+
+
+@code {
+    List<Animal> MyAnimals = new List<Animal>();
+
+    List<Animal> SearchedAnimals = null;
+
+    Animal tempAnimal = null;
+
+    string TempName = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        try
+        {
+            MyAnimals = await httpClient.GetFromJsonAsync<List<Animal>>("api/Animal");
+        }
+        catch (System.Exception e)
+        {
+
+            throw e;
+        }
+    }
+
+    private async Task Search(string name)
+    {
+        MyAnimals = await httpClient.GetFromJsonAsync<List<Animal>>($"api/Animal/search?name={name}");
+    }
+
+    //update
+    private void ToggleUpdate(Animal Animal)
+    {
+        tempAnimal = Animal;
+    }
+
+    private async Task UpdateAnimal(Animal newAnimal)
+    {
+        await httpClient.PutAsJsonAsync("/api/Animal", newAnimal);
+        MyAnimals = await httpClient.GetFromJsonAsync<List<Animal>>("/api/Animal");
+
+    }
+
+    private async Task CancelUpdate(Animal newAnimal)
+    {
+        MyAnimals = await httpClient.GetFromJsonAsync<List<Animal>>("/api/Animal");
+    }
+
+    //Add
+    public void Redirect()
+    {
+        nav.NavigateTo("/AddAnimal");
+    }
+
+    private void Test()
+    {
+
+    }
+
+    //Delete
+    private async Task DeleteAnimal(Animal Animal)
+    {
+        await httpClient.DeleteAsync($"/api/Animal/{Animal.Id}");
+        await OnInitializedAsync();
+    }
+
+  
+}
