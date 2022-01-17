@@ -37,6 +37,21 @@ namespace AnimalData.Server.Controllers
             return Ok(result);
         }
 
+
+        [HttpGet("limited/{number}")]
+        public async Task<IActionResult> GetLimitedAnimals(int number)
+        {
+            var result = _context.Animals.Where(n => n.Id >= 1 && n.Id <= number);
+            return Ok(result);
+        }
+
+        [HttpGet("filter")]
+        public async Task<IActionResult> GetAnimalsByAge([FromQuery] int AgeFrom, int AgeTo)
+        {
+            var result = _context.Animals.Where(q => q.Age >= AgeFrom && q.Age <= AgeTo);
+            return Ok(result);
+        }
+
         [HttpPost]
         public async Task<IActionResult> AddAnimal([FromBody] Animal newAnimal)
         {
@@ -92,5 +107,7 @@ namespace AnimalData.Server.Controllers
             await _context.SaveChangesAsync();
             return Ok("");
         }
+
+       
     }
 }
